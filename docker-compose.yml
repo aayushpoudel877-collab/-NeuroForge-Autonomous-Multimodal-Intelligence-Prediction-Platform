@@ -1,0 +1,7 @@
+services:
+  neuroforge:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      NEUROFORGE_SEED: "42"
