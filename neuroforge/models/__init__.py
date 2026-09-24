@@ -1,0 +1,1 @@
+"""Modality model adapters."""
