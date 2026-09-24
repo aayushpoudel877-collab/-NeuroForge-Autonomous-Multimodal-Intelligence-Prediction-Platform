@@ -1,0 +1,9 @@
+project:
+  name: neuroforge
+  seed: 42
+fusion:
+  strategy: confidence_weighted
+  temperature: 1.0
+runtime:
+  confidence_threshold: 0.55
+  max_batch_size: 16
