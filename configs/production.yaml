@@ -1,0 +1,13 @@
+service:
+  name: neuroforge-api
+  host: 0.0.0.0
+  port: 8000
+  workers: 2
+security:
+  require_api_key: true
+monitoring:
+  window_size: 100
+  drift_threshold: 0.15
+model:
+  registry: models/registry.json
+  default_stage: production
