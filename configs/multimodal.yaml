@@ -1,0 +1,25 @@
+model:
+  name: neuroforge_multimodal
+  embedding_dim: 128
+  text:
+    vocab_size: 4096
+    max_length: 128
+    heads: 4
+    layers: 2
+  vision:
+    channels: 3
+  audio:
+    channels: 1
+  temporal:
+    features: 1
+    heads: 4
+    layers: 2
+  cross_modal:
+    heads: 4
+
+training:
+  objective: binary_classification
+  loss: BCEWithLogitsLoss
+  optimizer: AdamW
+  mixed_precision: optional
+  checkpoint_dir: models/checkpoints
