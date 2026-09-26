@@ -8,6 +8,9 @@ class PredictionMonitor:
     window_size:int=100
     probabilities:deque=field(default_factory=lambda:deque(maxlen=100))
     latencies_ms:deque=field(default_factory=lambda:deque(maxlen=100))
+    def __post_init__(self):
+        self.probabilities=deque(self.probabilities,maxlen=self.window_size)
+        self.latencies_ms=deque(self.latencies_ms,maxlen=self.window_size)
     def record(self,probability:float,latency_ms:float):
         self.probabilities.append(float(probability));self.latencies_ms.append(float(latency_ms))
     def snapshot(self):
