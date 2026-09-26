@@ -3,6 +3,8 @@ WORKDIR /app
 COPY pyproject.toml README.md ./
 COPY neuroforge ./neuroforge
 COPY configs ./configs
+COPY docker ./docker
 RUN pip install --no-cache-dir .
 EXPOSE 8000
-CMD ["uvicorn","neuroforge.api:app","--host","0.0.0.0","--port","8000"]
+RUN chmod +x docker/entrypoint.sh
+ENTRYPOINT ["./docker/entrypoint.sh"]
