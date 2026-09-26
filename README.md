@@ -76,3 +76,10 @@ ruff check .
 4. Drift monitoring and automated retraining
 5. Feature store/vector retrieval
 6. Distributed inference and observability
+
+
+## Latest Engineering Expansion
+
+The platform now also contains a separated trainable PyTorch layer with modality MLP encoders, learned confidence-style fusion gates, reproducible synthetic training, and Accuracy/F1/ROC-AUC evaluation. MLOps foundations were added through an inference monitor and model-registry abstraction with tests. These components are intentionally decoupled from the serving adapters so they can mature into real Transformer, vision, speech, and temporal models without redesigning the API.
+
+See docs/deep-learning.md and configs/neural.yaml for the neural architecture and training configuration.
