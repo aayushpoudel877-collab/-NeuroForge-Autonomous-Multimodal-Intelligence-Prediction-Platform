@@ -1,0 +1,11 @@
+model:
+  architecture: multimodal_fusion_mlp
+  embedding_dim: 64
+  dropout: 0.15
+training:
+  epochs: 20
+  learning_rate: 0.002
+  weight_decay: 0.0001
+  seed: 42
+evaluation:
+  metrics: [accuracy, f1, roc_auc]
