@@ -1,0 +1,17 @@
+from __future__ import annotations
+from dataclasses import dataclass
+
+@dataclass
+class EarlyStopping:
+    patience:int=5
+    mode:str="max"
+    best:float|None=None
+    bad_epochs:int=0
+    stopped:bool=False
+    def step(self,value:float):
+        improved=self.best is None or (value>self.best if self.mode=="max" else value<self.best)
+        if improved:self.best=value;self.bad_epochs=0
+        else:
+            self.bad_epochs+=1
+            if self.bad_epochs>=self.patience:self.stopped=True
+        return improved
