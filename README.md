@@ -83,3 +83,8 @@ ruff check .
 The platform now also contains a separated trainable PyTorch layer with modality MLP encoders, learned confidence-style fusion gates, reproducible synthetic training, and Accuracy/F1/ROC-AUC evaluation. MLOps foundations were added through an inference monitor and model-registry abstraction with tests. These components are intentionally decoupled from the serving adapters so they can mature into real Transformer, vision, speech, and temporal models without redesigning the API.
 
 See docs/deep-learning.md and configs/neural.yaml for the neural architecture and training configuration.
+
+
+### Production Engineering Layer
+
+Recent additions include persistent model registration, experiment tracking, dataset schema lineage, probability calibration, feature drift detection, runtime health state, API operational models, security primitives, production configuration, Kubernetes deployment manifests, and a hardened container entrypoint. These are intentionally lightweight reference components that can be connected to managed infrastructure in a real deployment.
