@@ -1,7 +1,8 @@
 from pydantic import BaseModel,Field
+from .schemas import PredictionRequest
 
 class BatchPredictionRequest(BaseModel):
-    requests:list[dict]=Field(min_length=1,max_length=128)
+    requests:list[PredictionRequest]=Field(min_length=1,max_length=128)
 
 class ModelInfo(BaseModel):
     name:str
