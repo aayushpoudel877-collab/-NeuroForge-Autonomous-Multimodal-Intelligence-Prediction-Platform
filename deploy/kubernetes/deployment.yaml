@@ -2,22 +2,46 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: neuroforge-api
+  labels: {app: neuroforge-api}
 spec:
   replicas: 2
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: {maxUnavailable: 0, maxSurge: 1}
   selector:
     matchLabels: {app: neuroforge-api}
   template:
     metadata:
       labels: {app: neuroforge-api}
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: {type: RuntimeDefault}
       containers:
         - name: api
-          image: neuroforge:latest
+          image: neuroforge:0.3.0
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
+          envFrom:
+            - secretRef: {name: neuroforge-api-secrets, optional: true}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: {drop: ["ALL"]}
+            readOnlyRootFilesystem: false
           readinessProbe:
-            httpGet: {path: /health, port: 8000}
+            httpGet: {path: /ready, port: 8000}
             initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet: {path: /health, port: 8000}
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
           resources:
             requests: {cpu: "250m", memory: "512Mi"}
             limits: {cpu: "1", memory: "2Gi"}
@@ -31,3 +55,44 @@ spec:
   ports:
     - port: 80
       targetPort: 8000
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: neuroforge-api
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels: {app: neuroforge-api}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: neuroforge-api
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: neuroforge-api
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target: {type: Utilization, averageUtilization: 70}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: neuroforge-api
+spec:
+  podSelector:
+    matchLabels: {app: neuroforge-api}
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 8000
+  egress:
+    - {};
