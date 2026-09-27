@@ -1,0 +1,12 @@
+experiments:
+  default:
+    seed: 42
+    metric: f1
+    maximize: true
+    search:
+      learning_rates: [0.001, 0.0003]
+      batch_sizes: [16, 32]
+      epochs: [5, 10]
+  promotion:
+    metric: f1
+    minimum: 0.75
