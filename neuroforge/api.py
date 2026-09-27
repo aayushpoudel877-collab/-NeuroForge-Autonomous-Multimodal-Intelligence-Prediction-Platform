@@ -20,29 +20,6 @@ registry=JsonModelRegistry()
 traces=TraceStore()
 alerts=AlertStore()
 
-def _record_trace(request_id,started,response=None,error=None,request=None):
-    try:
-        metadata=(request.metadata if request else {}) or {}
-        trace=InferenceTrace(
-            request_id=request_id,
-            started_at=started,
-            finished_at=utc_now(),
-            status="error" if error else "ok",
-            latency_ms=float(response.pipeline_ms if response else (perf_counter()-_clock)*1000) if False else 0.0,
-            modalities=[m.modality for m in response.modalities] if response else [],
-            prediction=response.prediction if response else None,
-            probability=response.probability if response else None,
-            model_name=metadata.get("model_name"),
-            model_version=metadata.get("model_version"),
-            dataset_snapshot=metadata.get("dataset_snapshot"),
-            training_run=metadata.get("training_run"),
-            artifact_sha256=metadata.get("artifact_sha256"),
-            error_type=type(error).__name__ if error else None,
-        )
-        traces.append(trace)
-    except Exception:
-        pass
-
 @app.get("/health")
 def health():
     return health_state.snapshot()
