@@ -10,3 +10,8 @@ models/checkpoints/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !models/checkpoints/.gitkeep
+
+logs/*.jsonl
+models/*.json
+models/artifacts/*
+!models/checkpoints/.gitkeep
