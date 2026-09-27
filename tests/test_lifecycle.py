@@ -8,6 +8,8 @@ def test_artifact_store(tmp_path):
     source=tmp_path/"model.bin";source.write_bytes(b"neuroforge")
     artifact=ArtifactStore(tmp_path/"artifacts").register_file("demo","1",source,{"f1":.9})
     assert len(artifact.sha256)==64
+    loaded=ArtifactStore(tmp_path/"artifacts").get("demo","1")
+    assert loaded.sha256==artifact.sha256
 
 def test_history(tmp_path):
     history=LifecycleHistory(tmp_path/"history.json")
