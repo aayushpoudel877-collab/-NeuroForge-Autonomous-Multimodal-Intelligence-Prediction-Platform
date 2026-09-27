@@ -1,15 +1,21 @@
 from __future__ import annotations
-import json
 from pathlib import Path
 import numpy as np
 
 class MultimodalDataset:
-    """Dependency-light manifest dataset; decoders can be injected by production pipelines."""
+    """Dependency-light manifest dataset; production decoders can be injected."""
     def __init__(self,records,text_encoder=None,array_loader=None):
         self.records=list(records)
-        self.text_encoder=text_encoder or (lambda text: np.frombuffer(text.encode(),dtype=np.uint8)[:128])
+        self.text_encoder=text_encoder or self._default_text_encoder
         self.array_loader=array_loader or (lambda path: np.load(path))
+
+    @staticmethod
+    def _default_text_encoder(text):
+        tokens=np.frombuffer(text.encode(),dtype=np.uint8)[:128]
+        return np.pad(tokens,(0,128-len(tokens)))
+
     def __len__(self): return len(self.records)
+
     def __getitem__(self,index):
         r=self.records[index]
         return {
