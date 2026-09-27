@@ -1,6 +1,6 @@
 from __future__ import annotations
 from time import perf_counter
-from fastapi import FastAPI,HTTPException,Header,Response
+from fastapi import FastAPI,HTTPException,Header,Response,Depends
 from .pipeline import NeuroForgePipeline
 from .schemas import PredictionRequest,PredictionResponse
 from .api_models import BatchPredictionRequest,ModelInfo,ReadinessResponse
@@ -10,6 +10,8 @@ from .api_metrics import ApiMetrics
 from .registry import JsonModelRegistry
 from .observability import InferenceTrace,TraceStore,new_request_id,utc_now
 from .alerts import AlertStore,threshold_alert
+from .auth import require_api_key
+from .dashboard import dashboard
 
 app=FastAPI(title="NeuroForge API",version="0.3.0")
 pipeline=NeuroForgePipeline()
@@ -20,7 +22,7 @@ registry=JsonModelRegistry()
 traces=TraceStore()
 alerts=AlertStore()
 
-@app.get("/health")
+@app.get("/dashboard",include_in_schema=False)\ndef dashboard_page():\n    return dashboard()\n\n@app.get("/health")
 def health():
     return health_state.snapshot()
 
@@ -70,7 +72,7 @@ def recent_alerts(limit:int=100):
 def models():
     return [ModelInfo(name=x["name"],version=x["version"],stage=x["stage"]) for x in registry.list()]
 
-@app.post("/v1/predict",response_model=PredictionResponse)
+@app.post("/v1/predict",response_model=PredictionResponse,dependencies=[Depends(require_api_key)])
 def predict(request:PredictionRequest,response:Response,request_id:str|None=Header(default=None,alias="X-Request-ID")):
     rid=request_id or new_request_id()
     started=utc_now()
@@ -114,7 +116,7 @@ def predict(request:PredictionRequest,response:Response,request_id:str|None=Head
         except Exception: pass
         raise HTTPException(500,"inference failure") from e
 
-@app.post("/v1/batch-predict",response_model=list[PredictionResponse])
+@app.post("/v1/batch-predict",response_model=list[PredictionResponse],dependencies=[Depends(require_api_key)])
 def batch_predict(request:BatchPredictionRequest):
     metrics.batch()
     return [predict(item,Response()) for item in request.requests]
