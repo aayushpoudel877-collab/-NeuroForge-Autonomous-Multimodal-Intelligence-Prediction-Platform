@@ -14,15 +14,22 @@ class RegisteredModel:
 class JsonModelRegistry:
     def __init__(self,path:str="models/registry.json"):
         self.path=Path(path);self.path.parent.mkdir(parents=True,exist_ok=True)
-    def _load(self):
-        return json.loads(self.path.read_text()) if self.path.exists() else []
-    def register(self,model:RegisteredModel):
+    def _load(self): return json.loads(self.path.read_text()) if self.path.exists() else []
+    def register(self,model):
         items=[x for x in self._load() if not (x["name"]==model.name and x["version"]==model.version)]
         items.append(asdict(model));self.path.write_text(json.dumps(items,indent=2))
-    def promote(self,name:str,version:str,stage:str="production"):
+    def promote(self,name,version,stage="production"):
         items=self._load();found=False
         for x in items:
             if x["name"]==name and x["version"]==version:x["stage"]=stage;found=True
         if not found:raise KeyError(f"{name}:{version}")
         self.path.write_text(json.dumps(items,indent=2))
+    def rollback(self,name,version):
+        items=self._load();target=None
+        for x in items:
+            if x["name"]==name:
+                x["stage"]="archived"
+                if x["version"]==version:target=x
+        if target is None:raise KeyError(f"{name}:{version}")
+        target["stage"]="production";self.path.write_text(json.dumps(items,indent=2))
     def list(self): return self._load()
