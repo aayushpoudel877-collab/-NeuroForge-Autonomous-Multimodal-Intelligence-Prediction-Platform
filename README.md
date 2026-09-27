@@ -116,3 +116,25 @@ The current production layer includes:
 - Kubernetes secret template for API-key configuration
 
 The repository remains a reference architecture: the demo serving adapters are lightweight, while the trainable multimodal PyTorch stack is separated for real dataset/model integration.
+
+
+## Real ML/DL Integration Layer
+
+The platform now includes a concrete data-to-model path:
+- modality preprocessing for text, images, audio, and temporal series
+- manifest-backed multimodal dataset adapter
+- deterministic synthetic dataset generator for local development
+- tensor batch collation matching the neural model contract
+- evaluation runner with accuracy, precision, recall, and F1
+- modality-ablation benchmark for diagnostic comparisons
+- `neuroforge` CLI commands for demo-data preparation, evaluation, and benchmarking
+- automated tests covering preprocessing, collation, and evaluation
+
+Example:
+```bash
+neuroforge prepare-demo --output data/synthetic --samples 24
+neuroforge evaluate --manifest data/synthetic/manifest.json --root data/synthetic
+neuroforge benchmark --manifest data/synthetic/manifest.json --root data/synthetic
+```
+
+The generated dataset is intentionally synthetic. Real-world datasets and pretrained backbones are not claimed to be bundled; production integrations should provide licensed data, trained checkpoints, and dataset-specific preprocessing.
