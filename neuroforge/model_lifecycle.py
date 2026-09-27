@@ -27,7 +27,13 @@ class ArtifactStore:
         if not source.exists(): raise FileNotFoundError(path)
         target=self.root/f"{name}-{version}{source.suffix}"
         target.write_bytes(source.read_bytes())
-        return Artifact(name,version,str(target),hash_file(target),metrics or {},datetime.now(timezone.utc).isoformat())
+        artifact=Artifact(name,version,str(target),hash_file(target),metrics or {},datetime.now(timezone.utc).isoformat())
+        (self.root/f"{name}-{version}.json").write_text(json.dumps(asdict(artifact),indent=2))
+        return artifact
+    def get(self,name,version):
+        metadata=self.root/f"{name}-{version}.json"
+        if not metadata.exists(): raise KeyError(f"{name}:{version}")
+        return Artifact(**json.loads(metadata.read_text()))
 
 class PromotionGate:
     def __init__(self,metric="f1",minimum=.75):
