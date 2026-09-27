@@ -1,3 +1,4 @@
+import numpy as np
 from neuroforge.data.manifest import DatasetManifest,SampleRecord
 from neuroforge.data.quality import profile_manifest,validate_manifest
 from neuroforge.data.seeding import seed_everything
