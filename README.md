@@ -88,3 +88,16 @@ See docs/deep-learning.md and configs/neural.yaml for the neural architecture an
 ### Production Engineering Layer
 
 Recent additions include persistent model registration, experiment tracking, dataset schema lineage, probability calibration, feature drift detection, runtime health state, API operational models, security primitives, production configuration, Kubernetes deployment manifests, and a hardened container entrypoint. These are intentionally lightweight reference components that can be connected to managed infrastructure in a real deployment.
+
+
+## Observability and reliability
+
+The current production layer includes:
+- structured JSONL inference traces with request correlation IDs
+- model, dataset, training-run, and artifact lineage fields
+- dependency-light threshold alerts
+- JSON and Prometheus-style metrics
+- recent trace and alert API endpoints
+- persisted artifact metadata with SHA-256 integrity records
+- safer generic 500 responses that avoid exposing internal exception text
+- multimodal dataset-to-trainer batch validation
