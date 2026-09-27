@@ -101,3 +101,18 @@ The current production layer includes:
 - persisted artifact metadata with SHA-256 integrity records
 - safer generic 500 responses that avoid exposing internal exception text
 - multimodal dataset-to-trainer batch validation
+
+
+## Production hardening
+
+- Operations dashboard at `/dashboard`
+- Optional API-key enforcement through environment variables
+- Prometheus-style metrics endpoint
+- CI tests, Ruff checks, bytecode compilation, and dependency auditing
+- Non-root Docker execution
+- Kubernetes readiness/liveness probes
+- Rolling deployment strategy, PDB, HPA, and NetworkPolicy
+- Runtime telemetry files excluded from version control
+- Kubernetes secret template for API-key configuration
+
+The repository remains a reference architecture: the demo serving adapters are lightweight, while the trainable multimodal PyTorch stack is separated for real dataset/model integration.
