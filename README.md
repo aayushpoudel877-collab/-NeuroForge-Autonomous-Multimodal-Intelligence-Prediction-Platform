@@ -138,3 +138,23 @@ neuroforge benchmark --manifest data/synthetic/manifest.json --root data/synthet
 ```
 
 The generated dataset is intentionally synthetic. Real-world datasets and pretrained backbones are not claimed to be bundled; production integrations should provide licensed data, trained checkpoints, and dataset-specific preprocessing.
+
+
+## Training & Experiment Execution
+
+The project now has a complete local training path from manifest data to a selected checkpoint:
+- deterministic seeding
+- train/validation epoch execution
+- validation metrics every epoch
+- early stopping
+- best-checkpoint selection by validation F1
+- deterministic experiment run IDs
+- temperature-scaling calibration utility
+- `neuroforge train` CLI workflow
+
+Example:
+```bash
+neuroforge train --manifest data/synthetic/manifest.json --root data/synthetic --epochs 3
+```
+
+This provides the engineering path for real datasets while keeping scientific performance claims separate from the synthetic development fixture.
