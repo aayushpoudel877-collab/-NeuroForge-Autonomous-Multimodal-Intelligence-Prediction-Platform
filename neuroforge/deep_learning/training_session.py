@@ -6,7 +6,7 @@ import torch
 from .checkpoint import CheckpointManager
 from .trainer_engine import TrainerEngine
 from .training_loop import EarlyStopping
-from .runs import RunConfig,run_id
+from .runs import RunConfig,run_id,TrainingRun,RunStore
 
 def seed_everything(seed:int):
     random.seed(seed); np.random.seed(seed); torch.manual_seed(seed)
@@ -22,6 +22,7 @@ class TrainingSummary:
 
 def train_model(model,train_batches,val_batches,config:RunConfig,checkpoint_dir="models/checkpoints",device="cpu",patience=5):
     seed_everything(config.seed); model.to(device)
+    run=TrainingRun(run_id(config),config.__dict__.copy()); run.start(); RunStore().append(run)
     optimizer=torch.optim.AdamW(model.parameters(),lr=config.learning_rate)
     engine=TrainerEngine(model,optimizer,torch.nn.BCEWithLogitsLoss(),device)
     stopper=EarlyStopping(patience=patience,mode="max")
@@ -36,4 +37,5 @@ def train_model(model,train_batches,val_batches,config:RunConfig,checkpoint_dir=
             best_path=ckpt.save(model,optimizer,epoch,best_metric,"best.pt")
         stopper.step(val.metrics["f1"])
         if stopper.stopped: break
+    run.finish({"best_f1":best_metric,"best_epoch":best_epoch,"epochs_completed":len(history)}); RunStore().append(run)
     return TrainingSummary(run_id(config),best_epoch,best_metric,history,best_path)
