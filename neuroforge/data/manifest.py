@@ -19,10 +19,14 @@ class DatasetManifest:
         if train<=0 or val<0 or train+val>=1: raise ValueError("invalid split")
         items=self.records.copy(); random.Random(seed).shuffle(items); n=len(items)
         if n<3: raise ValueError("at least 3 samples are required for train/validation/test splitting")
-        a=max(1,int(n*train)); b=a+max(1,int(n*val))
-        if b>=n: b=n-1
-        if a>=b: raise ValueError("dataset is too small for non-empty train and validation splits")
-        return DatasetManifest(items[:a]),DatasetManifest(items[a:b]),DatasetManifest(items[b:])
+        train_n=max(1,int(n*train)); val_n=max(1,int(n*val))
+        while train_n+val_n>=n:
+            if train_n>1: train_n-=1
+            elif val_n>1: val_n-=1
+            else: break
+        test_n=n-train_n-val_n
+        if test_n<1: raise ValueError("dataset is too small for non-empty train, validation and test splits")
+        return DatasetManifest(items[:train_n]),DatasetManifest(items[train_n:train_n+val_n]),DatasetManifest(items[train_n+val_n:])
     def save_json(self,path):
         p=Path(path);p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps([asdict(x) for x in self.records],indent=2))
     @classmethod
