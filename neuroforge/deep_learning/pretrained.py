@@ -3,7 +3,7 @@ import torch
 from torch import nn
 
 class HuggingFaceTextEncoder(nn.Module):
-    def __init__(self,model_name="distilbert-base-uncased",freeze_backbone=True):
+    def __init__(self,model_name="distilbert-base-uncased",output_dim=128,freeze_backbone=True):
         super().__init__()
         try:
             from transformers import AutoModel
@@ -12,16 +12,19 @@ class HuggingFaceTextEncoder(nn.Module):
         self.backbone=AutoModel.from_pretrained(model_name)
         if freeze_backbone:
             for p in self.backbone.parameters(): p.requires_grad=False
+        self.projection=nn.Linear(self.backbone.config.hidden_size,output_dim)
 
     def forward(self,input_ids,attention_mask=None):
         out=self.backbone(input_ids=input_ids,attention_mask=attention_mask)
         hidden=out.last_hidden_state
-        if attention_mask is None: return hidden.mean(dim=1)
-        mask=attention_mask.unsqueeze(-1).to(hidden.dtype)
-        return (hidden*mask).sum(dim=1)/mask.sum(dim=1).clamp_min(1)
+        if attention_mask is None: pooled=hidden.mean(dim=1)
+        else:
+            mask=attention_mask.unsqueeze(-1).to(hidden.dtype)
+            pooled=(hidden*mask).sum(dim=1)/mask.sum(dim=1).clamp_min(1)
+        return self.projection(pooled)
 
 class TorchvisionVisionEncoder(nn.Module):
-    def __init__(self,model_name="resnet50",pretrained=True,freeze_backbone=True):
+    def __init__(self,model_name="resnet50",output_dim=128,pretrained=True,freeze_backbone=True):
         super().__init__()
         try:
             import torchvision.models as models
@@ -32,11 +35,15 @@ class TorchvisionVisionEncoder(nn.Module):
         elif hasattr(self.backbone,"heads") and hasattr(self.backbone.heads,"head"): self.backbone.heads.head=nn.Identity()
         if freeze_backbone:
             for p in self.backbone.parameters(): p.requires_grad=False
+        self.projection=nn.LazyLinear(output_dim)
 
-    def forward(self,images): return self.backbone(images)
+    def forward(self,images):
+        features=self.backbone(images)
+        if features.ndim>2: features=features.flatten(1)
+        return self.projection(features)
 
 class Wav2Vec2AudioEncoder(nn.Module):
-    def __init__(self,freeze_backbone=True):
+    def __init__(self,output_dim=128,freeze_backbone=True):
         super().__init__()
         try:
             import torchaudio
@@ -46,8 +53,9 @@ class Wav2Vec2AudioEncoder(nn.Module):
         self.backbone=self.bundle.get_model()
         if freeze_backbone:
             for p in self.backbone.parameters(): p.requires_grad=False
+        self.projection=nn.Linear(768,output_dim)
 
     def forward(self,waveforms):
         if waveforms.ndim==3: waveforms=waveforms.squeeze(1)
         features,_=self.backbone.extract_features(waveforms)
-        return features[-1].mean(dim=1)
+        return self.projection(features[-1].mean(dim=1))
