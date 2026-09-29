@@ -3,8 +3,11 @@ from .fusion_net import MultimodalFusionNet
 from .modal_encoders import TextTransformerEncoder,VisionCNNEncoder,AudioCNNEncoder,TemporalTransformerEncoder
 from .cross_modal import CrossModalAttention
 from .unified_model import NeuroForgeMultimodalModel
+from .pretrained import HuggingFaceTextEncoder,TorchvisionVisionEncoder,Wav2Vec2AudioEncoder
 
 __all__=[
     "MLPEncoder","MultimodalFusionNet","TextTransformerEncoder","VisionCNNEncoder",
-    "AudioCNNEncoder","TemporalTransformerEncoder","CrossModalAttention","NeuroForgeMultimodalModel"
+    "AudioCNNEncoder","TemporalTransformerEncoder","CrossModalAttention",
+    "NeuroForgeMultimodalModel","HuggingFaceTextEncoder","TorchvisionVisionEncoder",
+    "Wav2Vec2AudioEncoder"
 ]
