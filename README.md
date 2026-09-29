@@ -39,3 +39,23 @@ Optional pretrained adapters are available for Hugging Face text Transformers, t
 Evaluation now reports threshold metrics plus AUROC, PR-AUC, Brier score and expected calibration error. Model cards can be generated with neuroforge.model_card.
 
 See docs/advanced-intelligence.md for the advanced layer and its scientific limitations.
+
+
+## Scientific Evaluation & Robustness
+
+The latest training layer adds:
+- reproducible initialization before model construction
+- deterministic cuDNN settings when available
+- explicit rejection of empty training/validation batches
+- failed-run recording in the experiment store
+- calibrated evaluation through temperature scaling
+- randomized missing-modality robustness testing
+- modality dropout reports at multiple probabilities
+- expanded training history with AUROC, PR-AUC, Brier and ECE
+
+Development examples:
+
+    neuroforge evaluate --manifest data/synthetic/manifest.json --root data/synthetic --calibrate
+    neuroforge robustness --manifest data/synthetic/manifest.json --root data/synthetic
+
+For rigorous scientific evaluation, calibration should use a validation split and final metrics should be measured on an untouched test split. The synthetic dataset remains a development fixture.
