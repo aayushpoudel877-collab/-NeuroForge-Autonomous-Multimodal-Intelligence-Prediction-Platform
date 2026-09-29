@@ -4,10 +4,11 @@ from .modal_encoders import TextTransformerEncoder,VisionCNNEncoder,AudioCNNEnco
 from .cross_modal import CrossModalAttention
 from .unified_model import NeuroForgeMultimodalModel
 from .pretrained import HuggingFaceTextEncoder,TorchvisionVisionEncoder,Wav2Vec2AudioEncoder
+from .robustness import robustness_report,random_mask_batches
 
 __all__=[
     "MLPEncoder","MultimodalFusionNet","TextTransformerEncoder","VisionCNNEncoder",
     "AudioCNNEncoder","TemporalTransformerEncoder","CrossModalAttention",
     "NeuroForgeMultimodalModel","HuggingFaceTextEncoder","TorchvisionVisionEncoder",
-    "Wav2Vec2AudioEncoder"
+    "Wav2Vec2AudioEncoder","robustness_report","random_mask_batches"
 ]
