@@ -8,8 +8,10 @@ class CrossModalAttention(nn.Module):
         self.attention=nn.MultiheadAttention(embedding_dim,heads,batch_first=True)
         self.norm=nn.LayerNorm(embedding_dim)
         self.gate=nn.Sequential(nn.Linear(embedding_dim,embedding_dim),nn.Sigmoid())
+
     def forward(self,modal_embeddings):
-        tokens=torch.stack(modal_embeddings,dim=1)
+        tokens=modal_embeddings if isinstance(modal_embeddings,torch.Tensor) else torch.stack(modal_embeddings,dim=1)
+        if tokens.ndim!=3: raise ValueError("modal embeddings must have shape [batch, modalities, embedding]")
         attended,_=self.attention(tokens,tokens,tokens)
         gated=attended*self.gate(attended)
         return self.norm(tokens+gated)
