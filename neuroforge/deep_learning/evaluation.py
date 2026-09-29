@@ -10,7 +10,6 @@ from .calibration_fit import fit_temperature
 @torch.no_grad()
 def collect_predictions(model,batches,device="cpu",ablation=None):
     model.eval(); logits=[]; labels=[]
-    indices={"text":0,"image":1,"audio":2,"temporal"}
     indices={"text":0,"image":1,"audio":2,"temporal":3}
     for batch in batches:
         text=torch.as_tensor(batch["text"],device=device,dtype=torch.long)
@@ -31,8 +30,9 @@ def evaluate_model(model,batches,device="cpu",ablation=None):
 def evaluate_calibrated(model,batches,device="cpu",temperature=None):
     z,y=collect_predictions(model,batches,device)
     scaler=TemperatureScaler(temperature) if temperature is not None else fit_temperature(z,y)
-    calibrated=scaler.transform_logits(z)
-    return {"samples":int(len(y)),"temperature":float(scaler.temperature),**binary_metrics(np.log(np.clip(calibrated,1e-6,1-1e-6)/(1-np.clip(calibrated,1e-6,1-1e-6))),y)}
+    probabilities=scaler.transform_logits(z)
+    calibrated_logits=np.log(np.clip(probabilities,1e-6,1-1e-6)/(1-np.clip(probabilities,1e-6,1-1e-6)))
+    return {"samples":int(len(y)),"temperature":float(scaler.temperature),**binary_metrics(calibrated_logits,y)}
 
 def save_evaluation(report,path):
     p=Path(path); p.parent.mkdir(parents=True,exist_ok=True); p.write_text(json.dumps(report,indent=2))
