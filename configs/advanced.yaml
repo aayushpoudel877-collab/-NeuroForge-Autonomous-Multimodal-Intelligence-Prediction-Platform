@@ -1,0 +1,20 @@
+advanced:
+  text:
+    backend: huggingface
+    model: distilbert-base-uncased
+    freeze: true
+  vision:
+    backend: torchvision
+    model: resnet50
+    pretrained: true
+    freeze: true
+  audio:
+    backend: wav2vec2
+    sample_rate: 16000
+    freeze: true
+  temporal:
+    backend: native_transformer
+    freeze: false
+evaluation:
+  metrics: [accuracy, precision, recall, f1, auroc, pr_auc, brier, ece]
+  missing_modality_ablation: true
