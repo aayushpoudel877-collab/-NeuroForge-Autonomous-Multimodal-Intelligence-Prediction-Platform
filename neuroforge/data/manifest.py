@@ -13,22 +13,21 @@ class SampleRecord:
     series_path:str=""
 
 class DatasetManifest:
-    def __init__(self,records=None):
-        self.records=list(records or [])
-    def add(self,record:SampleRecord):
-        self.records.append(record)
+    def __init__(self,records=None): self.records=list(records or [])
+    def add(self,record:SampleRecord): self.records.append(record)
     def split(self,train=.8,val=.1,seed=42):
         if train<=0 or val<0 or train+val>=1: raise ValueError("invalid split")
-        items=self.records.copy(); random.Random(seed).shuffle(items)
-        n=len(items); a=int(n*train); b=a+int(n*val)
+        items=self.records.copy(); random.Random(seed).shuffle(items); n=len(items)
+        if n<3: raise ValueError("at least 3 samples are required for train/validation/test splitting")
+        a=max(1,int(n*train)); b=a+max(1,int(n*val))
+        if b>=n: b=n-1
+        if a>=b: raise ValueError("dataset is too small for non-empty train and validation splits")
         return DatasetManifest(items[:a]),DatasetManifest(items[a:b]),DatasetManifest(items[b:])
     def save_json(self,path):
-        p=Path(path);p.parent.mkdir(parents=True,exist_ok=True)
-        p.write_text(json.dumps([asdict(x) for x in self.records],indent=2))
+        p=Path(path);p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps([asdict(x) for x in self.records],indent=2))
     @classmethod
     def load_json(cls,path):
-        data=json.loads(Path(path).read_text())
-        return cls(SampleRecord(**x) for x in data)
+        data=json.loads(Path(path).read_text()); return cls(SampleRecord(**x) for x in data)
     def save_csv(self,path):
         p=Path(path);p.parent.mkdir(parents=True,exist_ok=True)
         with p.open("w",newline="") as f:
