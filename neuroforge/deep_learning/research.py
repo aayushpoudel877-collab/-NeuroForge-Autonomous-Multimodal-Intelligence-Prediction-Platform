@@ -185,6 +185,7 @@ class ResearchExperimentEngine:
                         "epochs": config.epochs,
                         "seed": config.seed,
                         "checkpoint": summary.checkpoint,
+                        "validation_f1": float(summary.best_metric),
                         **test,
                         "calibrated": calibrated,
                         "temperature": float(scaler.temperature),
@@ -216,18 +217,21 @@ class ResearchExperimentEngine:
                     "batch_size": key[1],
                     "epochs": key[2],
                     "seeds": [r["seed"] for r in group],
-                    "metrics": aggregate_seed_metrics(
+                    "validation": aggregate_seed_metrics(
+                        group, metrics=("validation_f1",), bootstrap_samples=spec.bootstrap_samples
+                    ),
+                    "test_metrics": aggregate_seed_metrics(
                         group, bootstrap_samples=spec.bootstrap_samples
                     ),
                 }
             )
         comparisons.sort(
-            key=lambda x: x["metrics"].get("f1", {}).get("mean", -math.inf),
+            key=lambda x: x["validation"].get("validation_f1", {}).get("mean", -math.inf),
             reverse=True,
         )
         best_run = max(
             completed,
-            key=lambda x: float(x.get("f1", -math.inf)),
+            key=lambda x: float(x.get("validation_f1", -math.inf)),
             default=None,
         )
         return {
