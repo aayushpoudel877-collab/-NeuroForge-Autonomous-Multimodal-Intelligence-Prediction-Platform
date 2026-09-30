@@ -3,7 +3,7 @@ requires=["setuptools>=68","wheel"]
 build-backend="setuptools.build_meta"
 [project]
 name="neuroforge"
-version="0.3.0"
+version="0.4.0"
 description="Autonomous multimodal intelligence and prediction platform"
 requires-python=">=3.11"
 dependencies=["fastapi>=0.115","uvicorn[standard]>=0.30","pydantic>=2.8","numpy>=1.26","pandas>=2.2","scikit-learn>=1.5","pillow>=10.4","pyyaml>=6.0"]
