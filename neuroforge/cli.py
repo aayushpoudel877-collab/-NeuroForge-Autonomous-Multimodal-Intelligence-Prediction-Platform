@@ -8,7 +8,8 @@ from .deep_learning.unified_model import NeuroForgeMultimodalModel
 from .deep_learning.evaluation import evaluate_model,save_evaluation,evaluate_calibrated
 from .deep_learning.benchmark import benchmark_modalities
 from .deep_learning.robustness import robustness_report
-from .deep_learning.research import ExperimentSpec,ResearchExperimentEngine,save_research_report
+from .deep_learning.research import ExperimentSpec,ResearchExperimentEngine,save_research_report,modality_ablation_matrix
+from .model_card import build_model_card,save_model_card
 from .deep_learning.runs import RunConfig
 from .deep_learning.training_session import train_model,seed_everything
 
@@ -50,6 +51,22 @@ def main():
         )
         engine=ResearchExperimentEngine(model_factory,train_batches_factory,val_batches_factory,test_batches,args.checkpoint_dir)
         report=engine.run(spec)
+        if report.get("best_run"):
+            best_checkpoint=report["best_run"]["checkpoint"]
+            seed_everything(int(report["best_run"]["seed"]))
+            best_model=NeuroForgeMultimodalModel()
+            state=torch.load(best_checkpoint,map_location="cpu",weights_only=False)
+            best_model.load_state_dict(state["model"])
+            report["best_run"]["modality_ablation"]=modality_ablation_matrix(best_model,test_batches)
+            card=build_model_card(
+                "NeuroForgeMultimodalModel",
+                "binary multimodal prediction",
+                report["best_run"]["calibrated"],
+                ("text","image","audio","temporal"),
+                ["Synthetic data is a development fixture; results are not production evidence."],
+            )
+            report["model_card"]=card
+            save_model_card(card,"reports/research-model-card.json")
         save_research_report(report,args.output)
         print(json.dumps(report,indent=2)); return
     if args.command=="train":
@@ -64,7 +81,11 @@ def main():
     batches=batch_dataset(dataset)
     if args.command=="benchmark": report=benchmark_modalities(model,batches)
     elif args.command=="robustness": report=robustness_report(model,batches)
-    elif args.calibrate: report=evaluate_calibrated(model,batches)
+    elif args.calibrate:
+        _,calibration_manifest,test_manifest=dataset.manifest.split(train=.7,val=.15,seed=42)
+        calibration_batches=batch_dataset(ManifestDataset(calibration_manifest,args.root))
+        test_batches=batch_dataset(ManifestDataset(test_manifest,args.root))
+        report=evaluate_calibrated(model,test_batches,calibration_batches=calibration_batches)
     else: report=evaluate_model(model,batches)
     save_evaluation(report,args.output); print(json.dumps(report,indent=2))
 
