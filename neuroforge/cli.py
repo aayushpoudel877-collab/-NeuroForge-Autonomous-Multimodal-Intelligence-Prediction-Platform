@@ -39,10 +39,10 @@ def main():
         test_batches=batch_dataset(test_ds,batch_size)
         def model_factory():
             return NeuroForgeMultimodalModel()
-        def train_batches_factory(seed):
-            return batch_dataset(train_ds,batch_size)
-        def val_batches_factory(seed):
-            return batch_dataset(val_ds,batch_size)
+        def train_batches_factory(config):
+            return batch_dataset(train_ds,config.batch_size)
+        def val_batches_factory(config):
+            return batch_dataset(val_ds,config.batch_size)
         spec=ExperimentSpec(
             learning_rates=tuple(float(x) for x in args.learning_rates.split(",") if x.strip()),
             batch_sizes=tuple(int(x) for x in args.batch_sizes.split(",") if x.strip()),
