@@ -225,11 +225,17 @@ class ResearchExperimentEngine:
             key=lambda x: x["metrics"].get("f1", {}).get("mean", -math.inf),
             reverse=True,
         )
+        best_run = max(
+            completed,
+            key=lambda x: float(x.get("f1", -math.inf)),
+            default=None,
+        )
         return {
             "experiment": asdict(spec),
             "results": results,
             "comparison": comparisons,
             "best": comparisons[0] if comparisons else None,
+            "best_run": best_run,
         }
 
 
