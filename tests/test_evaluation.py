@@ -17,3 +17,13 @@ def test_multimodal_evaluation():
 def test_calibrated_evaluation():
     report=evaluate_calibrated(NeuroForgeMultimodalModel(),[_batch()])
     assert report["samples"]==2 and .05<=report["temperature"]<=20
+
+
+def test_calibration_can_use_separate_calibration_data():
+    model = NeuroForgeMultimodalModel()
+    calibration = _batch()
+    evaluation = _batch()
+    report = evaluate_calibrated(
+        model, evaluation, calibration_batches=[calibration]
+    )
+    assert report["samples"] == 2
