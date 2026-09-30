@@ -59,3 +59,24 @@ Development examples:
     neuroforge robustness --manifest data/synthetic/manifest.json --root data/synthetic
 
 For rigorous scientific evaluation, calibration should use a validation split and final metrics should be measured on an untouched test split. The synthetic dataset remains a development fixture.
+
+
+## Research Experiments & Model Selection
+
+The research layer automates multi-seed hyperparameter experiments while keeping the held-out test set out of checkpoint selection and calibration fitting.
+
+Example:
+
+    neuroforge experiment --manifest data/synthetic/manifest.json --root data/synthetic --epochs 3 --learning-rates 0.001,0.0005 --batch-sizes 4,8 --seeds 42,43,44
+
+Each configuration:
+- builds a fresh model after deterministic seeding
+- trains on the training split
+- selects the checkpoint using validation F1
+- evaluates once on the untouched test split
+- fits temperature scaling on validation predictions only
+- reports calibrated test metrics
+- aggregates repeated seeds with bootstrap confidence intervals
+- records failed configurations rather than silently dropping them
+
+The experiment report also includes a modality-ablation matrix for the selected run and an automatic research model card. Synthetic data remains a development fixture and must not be interpreted as production evidence.
