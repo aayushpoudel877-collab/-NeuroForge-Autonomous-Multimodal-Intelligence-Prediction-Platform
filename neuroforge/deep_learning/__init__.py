@@ -14,3 +14,5 @@ __all__=[
 ]
 
 from .research import ExperimentSpec, ResearchExperimentEngine, bootstrap_ci, modality_ablation_matrix
+
+from ..governance import ModelGovernance, GovernanceDecision
