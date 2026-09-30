@@ -27,10 +27,10 @@ def test_experiment_grid_and_selection():
     )
     assert len(spec.configs()) == 8
     results = [
-        {"status": "completed", "seed": 42, "f1": 0.6, "auroc": 0.7},
-        {"status": "completed", "seed": 43, "f1": 0.8, "auroc": 0.9},
+        {"status": "completed", "seed": 42, "f1": 0.95, "validation_f1": 0.6, "auroc": 0.7},
+        {"status": "completed", "seed": 43, "f1": 0.7, "validation_f1": 0.8, "auroc": 0.9},
         {"status": "failed", "seed": 44, "f1": 1.0},
     ]
-    assert select_experiment(results)["f1"] == pytest.approx(0.8)
+    assert select_experiment(results)["f1"] == pytest.approx(0.7)
     aggregate = aggregate_seed_metrics(results[:2], bootstrap_samples=200)
     assert aggregate["f1"]["n"] == 2
