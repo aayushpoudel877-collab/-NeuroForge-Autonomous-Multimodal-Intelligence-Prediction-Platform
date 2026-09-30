@@ -12,3 +12,5 @@ __all__=[
     "NeuroForgeMultimodalModel","HuggingFaceTextEncoder","TorchvisionVisionEncoder",
     "Wav2Vec2AudioEncoder","robustness_report","random_mask_batches"
 ]
+
+from .research import ExperimentSpec, ResearchExperimentEngine, bootstrap_ci, modality_ablation_matrix
