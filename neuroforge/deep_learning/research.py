@@ -121,8 +121,8 @@ class ResearchExperimentEngine:
     def __init__(
         self,
         model_factory: Callable[[], torch.nn.Module],
-        train_batches_factory: Callable[[int], list[dict]],
-        val_batches_factory: Callable[[int], list[dict]],
+        train_batches_factory: Callable[[RunConfig], list[dict]],
+        val_batches_factory: Callable[[RunConfig], list[dict]],
         test_batches: list[dict],
         checkpoint_dir: str = "models/checkpoints/research",
         device: str = "cpu",
@@ -143,8 +143,8 @@ class ResearchExperimentEngine:
 
                 seed_everything(config.seed)
                 model = self.model_factory()
-                train_batches = self.train_batches_factory(config.seed)
-                val_batches = self.val_batches_factory(config.seed)
+                train_batches = self.train_batches_factory(config)
+                val_batches = self.val_batches_factory(config)
                 summary: TrainingSummary = train_model(
                     model,
                     train_batches,
