@@ -80,3 +80,14 @@ Each configuration:
 - records failed configurations rather than silently dropping them
 
 The experiment report also includes a modality-ablation matrix for the selected run and an automatic research model card. Synthetic data remains a development fixture and must not be interpreted as production evidence.
+
+
+## Model Governance & Safe Promotion
+
+NeuroForge v0.5.0 adds a governed path from research artifacts to production registry state:
+
+**checkpoint → immutable artifact copy → SHA-256 digest → candidate registry entry → metric gate → audited decision → production promotion**
+
+Use `neuroforge.governance.ModelGovernance` to register and evaluate a checkpoint. Promotion is permitted only when the configured gate passes. Governance history records the model version, artifact digest, metric value, threshold and timestamp.
+
+This governance layer is a development baseline. Production environments should add signed artifacts, durable external storage, human approval workflows and application-specific validation requirements.
