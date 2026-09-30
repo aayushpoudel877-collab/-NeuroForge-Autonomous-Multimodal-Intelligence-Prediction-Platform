@@ -27,9 +27,13 @@ def evaluate_model(model,batches,device="cpu",ablation=None):
     z,y=collect_predictions(model,batches,device,ablation)
     return {"samples":int(len(y)),**binary_metrics(z,y)}
 
-def evaluate_calibrated(model,batches,device="cpu",temperature=None):
+def evaluate_calibrated(model,batches,device="cpu",temperature=None,calibration_batches=None):
     z,y=collect_predictions(model,batches,device)
-    scaler=TemperatureScaler(temperature) if temperature is not None else fit_temperature(z,y)
+    calibration_z,calibration_y = (
+        collect_predictions(model, calibration_batches, device)
+        if calibration_batches is not None else (z,y)
+    )
+    scaler=TemperatureScaler(temperature) if temperature is not None else fit_temperature(calibration_z,calibration_y)
     probabilities=scaler.transform_logits(z)
     calibrated_logits=np.log(np.clip(probabilities,1e-6,1-1e-6)/(1-np.clip(probabilities,1e-6,1-1e-6)))
     return {"samples":int(len(y)),"temperature":float(scaler.temperature),**binary_metrics(calibrated_logits,y)}
